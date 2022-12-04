@@ -10,6 +10,7 @@
 #include <bits/stdc++.h>
 #include <list>
 #include <map>
+#include <bits/stdc++.h>
 using namespace std;
 
 void menu(){
@@ -20,12 +21,186 @@ void menu(){
 }
 map<string, vector<string>>adjacency_list;
 
-void DF(list<string> list1, stack<string> stack1);
+void DF(list<string> filled, stack<string> stored);
 
-bool check(list<string> list1, string basicString);
+bool check(list<string> foolist, const string& foovar);
+
+void MPSS(int source, int destination);
+void MPSS(const string& input, const string& string2);
+
+void MPS(list<string> list1, queue<string> stack1, string basicString,int count,vector<string> path = {});
+
+static map<int, vector<int>>adj_int;
+static map<string, int>encode;
+static map<int,string>decode;
+void Build_Dict(){
+    encode["A"] =0;
+    encode["B"] =1;
+    encode["C"] =2;
+    encode["D"] =3;
+    encode["E"] =4;
+    encode["F"] =5;
+    encode["G"]=6;
+    encode["H"]=7;
+    encode["I"]=8;
+    decode[0] ="A";
+    decode[1] ="B";
+    decode[2] ="C";
+    decode[3] ="D";
+    decode[4] ="E";
+    decode[5] ="F";
+    decode[6]="G";
+    decode[7]="H";
+    decode[8]="I";
+}
+
+void add_edge(int src, int dest)
+{
+    adj_int[src].push_back(dest);
+    adj_int[dest].push_back(src);
+}
+/*
+void add_edge_string(string src, string dest)
+{
+    adj_int[src].push_back(dest);
+    adj_int[dest].push_back(src);
+}
+ */
+void AMP(){
+    Build_Dict();
+    /*
+    add_edge("A","B");
+    add_edge("A","C");
+    add_edge("A","D");
+    add_edge("B","E");
+    add_edge("C","B");
+    add_edge("C","G");
+    add_edge("D","C");
+    add_edge("D","G");
+    add_edge("E","C");
+    add_edge("E","F");
+    add_edge("F","C");
+    add_edge("F","H");
+    add_edge("G","F");
+    add_edge("G","H");
+    add_edge("G","I");
+    add_edge("H","E");
+    add_edge("H","I");
+    add_edge("I","F");
+    */
+    add_edge(encode["A"],encode["B"]);
+    add_edge(encode["A"],encode["C"]);
+    add_edge(encode["A"],encode["D"]);
+    add_edge(encode["B"],encode["E"]);
+    add_edge(encode["C"],encode["B"]);
+    add_edge(encode["C"],encode["G"]);
+    add_edge(encode["D"],encode["C"]);
+    add_edge(encode["D"],encode["G"]);
+    add_edge(encode["E"],encode["C"]);
+    add_edge(encode["E"],encode["F"]);
+    add_edge(encode["F"],encode["C"]);
+    add_edge(encode["F"],encode["H"]);
+    add_edge(encode["G"],encode["F"]);
+    add_edge(encode["G"],encode["H"]);
+    add_edge(encode["G"],encode["I"]);
+    add_edge(encode["H"],encode["E"]);
+    add_edge(encode["H"],encode["I"]);
+    add_edge(encode["I"],encode["F"]);
+}
 
 
-void MPS(list<string> list1, stack<string> stack1, string basicString,int count,vector<string> path = {});
+bool MFS(int src, int dest, int v,
+         int pred[], int dist[])
+{
+    // a queue to maintain queue of vertices whose
+    // adjacency list is to be scanned as per normal
+    // DFS algorithm
+    list<int> queue;
+
+    // boolean array visited[] which stores the
+    // information whether ith vertex is reached
+    // at least once in the Breadth first search
+    bool visited[v];
+
+    // initially all vertices are unvisited
+    // so v[i] for all i is false
+    // and as no path is yet constructed
+    // dist[i] for all i set to infinity
+    for (int i = 0; i < v; i++) {
+        visited[i] = false;
+        dist[i] = INT_MAX;
+        pred[i] = -1;
+    }
+
+    // now source is first to be visited and
+    // distance from source to itself should be 0
+    visited[src] = true;
+    dist[src] = 0;
+    queue.push_back(src);
+
+    // standard MFS algorithm
+    while (!queue.empty()) {
+        int u = queue.front();
+        queue.pop_front();
+        for (int i = 0; i < adj_int[u].size(); i++) {
+            if (!visited[adj_int[u][i]]) {
+                visited[adj_int[u][i]] = true;
+                dist[adj_int[u][i]] = dist[u] + 1;
+                pred[adj_int[u][i]] = u;
+                queue.push_back(adj_int[u][i]);
+
+                // We stop MFS when we find
+                // destination.
+                if (adj_int[u][i] == dest)
+                    return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+// utility function to print the shortest distance
+// between source vertex and destination vertex
+void SD(int s,
+        int dest, int v)
+{
+    // predecessor[i] array stores predecessor of
+    // i and distance array stores distance of i
+    // from s
+    int pred[v], dist[v];
+
+    if (!MFS(s, dest, v, pred, dist)) {
+        cout << "Given source and destination"
+             << " are not connected";
+        return;
+    }
+
+    // vector path stores the shortest path
+    vector<int> path;
+    int crawl = dest;
+    path.push_back(crawl);
+    while (pred[crawl] != -1) {
+        path.push_back(pred[crawl]);
+        crawl = pred[crawl];
+    }
+
+    // distance from source is in distance array
+    //cout << "Shortest path length is : "
+    //     << dist[dest];
+
+    // printing path from source to destination
+   // cout << "\nPath is::\n";
+    for (int i = path.size() - 1; i >= 0; i--)
+        cout << decode[path[i]] << " ";
+}
+
+
+
+
+
+
+
 
 void A_M(){
     /*
@@ -58,32 +233,32 @@ void A_M(){
     H.push_back("I");
     I.push_back("F");
      */
-    adjacency_list ["A"].push_back("B");
-    adjacency_list ["A"].push_back("C");
-    adjacency_list ["A"].push_back("D");
-    adjacency_list ["B"].push_back("E");
+    adjacency_list ["A"].emplace_back("B");
+    adjacency_list ["A"].emplace_back("C");
+    adjacency_list ["A"].emplace_back("D");
+    adjacency_list ["B"].emplace_back("E");
 
-    adjacency_list ["C"].push_back("B");
-    adjacency_list ["C"].push_back("G");
-    adjacency_list ["D"].push_back("C");
-    adjacency_list ["D"].push_back("G");
-    adjacency_list ["E"].push_back("C");
-    adjacency_list ["E"].push_back("F");
-    adjacency_list ["F"].push_back("C");
-    adjacency_list ["F"].push_back("H");
-    adjacency_list ["G"].push_back("F");
-    adjacency_list ["G"].push_back("H");
-    adjacency_list ["G"].push_back("I");
-    adjacency_list ["H"].push_back("E");
-    adjacency_list ["H"].push_back("I");
-    adjacency_list ["I"].push_back("F");
+    adjacency_list ["C"].emplace_back("B");
+    adjacency_list ["C"].emplace_back("G");
+    adjacency_list ["D"].emplace_back("C");
+    adjacency_list ["D"].emplace_back("G");
+    adjacency_list ["E"].emplace_back("C");
+    adjacency_list ["E"].emplace_back("F");
+    adjacency_list ["F"].emplace_back("C");
+    adjacency_list ["F"].emplace_back("H");
+    adjacency_list ["G"].emplace_back("F");
+    adjacency_list ["G"].emplace_back("H");
+    adjacency_list ["G"].emplace_back("I");
+    adjacency_list ["H"].emplace_back("E");
+    adjacency_list ["H"].emplace_back("I");
+    adjacency_list ["I"].emplace_back("F");
 }
 
 
-void DFS(string input){
+void DFS(const string& input){
     list<string> used;
     stack<string> tmp_stack;
-    used.push_back("H");
+    used.push_back(input);
     tmp_stack.push(input);
     DF(used,tmp_stack);
 }
@@ -93,7 +268,7 @@ void DF(list<string> filled, stack<string> stored) {
     stored.pop();
     cout<<current<<" ";
     vector<string>tmp = adjacency_list [current];
-    for(auto k: tmp){
+    for(const auto& k: tmp){
         if(!check(filled,k)){
             //cout<<k<<" ";
             filled.push_back(k);
@@ -106,58 +281,161 @@ void DF(list<string> filled, stack<string> stored) {
     }
 }
 
-bool check(list<string> foolist, string foovar) {
+bool check(list<string> foolist, const string& foovar) {
     bool found = (std::find(foolist.begin(), foolist.end(), foovar) != foolist.end());
     return found;
 
 }
 
-void MPSS(string input,string go){
+void MPSS(const string& input,const string& go){
     list<string> used;
-    stack<string> tmp_stack;
-    used.push_back("H");
-    tmp_stack.push(input);
+    queue<string> tmp_queue;
+    used.push_back(input);
+    tmp_queue.push(input);
     int count=0;
     vector<string> path = {};
-    MPS(used,tmp_stack,go,count,path);
+//    MPS(used,tmp_queue,go,count,path);
+}
+
+
+
+void MPSS(int source, int destination){
+    SD(source, destination, 9);
+
 }
 //int min = 100000000;
 
-int min_tmp = 10000000;
-vector<string> min_path = {};
+//int min_tmp = 10000000;
+//vector<string> min_path = {};
+/*
+void MPS(list<string> filled, queue<string> stored, string dest, int count, vector<string> path) {
 
-void MPS(list<string> filled, stack<string> stored, string dest, int count, vector<string> path) {
-    string current = stored.top();
-    stored.pop();
-    path.push_back(current);
-    count = count +1;
-    //cout<<count<<" ";
-    //cout<<current<<" ";
-    vector<string>tmp = adjacency_list [current];
-    if(!(current == dest)) {
-        for (auto k: tmp) {
-            if (!check(filled, k)) {
-                //cout<<k<<" ";
-                filled.push_back(k);
-                stored.push(k);
+        string current = stored.front();
+        stored.pop();
+        path.push_back(current);
+        count = count + 1;
+        cout << count << endl;
+        //cout<<count<<" ";
+        //cout<<current<<" ";
+        vector<string> tmp = adjacency_list[current];
+        if (!(current == dest)) {
+            for (auto k: tmp) {
+                if (!check(filled, k)) {
+                    //cout<<k<<" ";
+                    //filled.push_back(k);
+                    stored.push(k);
+                }
             }
+
+        } else if (min_tmp > count) {
+            min_tmp = count;
+            min_path = path;
+
         }
-        if(!stored.empty()) {
-            MPS(filled, stored,dest,count,path);
-        }
-    }
-    else if(min_tmp>count){
-        min_tmp = count;
-        min_path = path;
-    }
-    path.pop_back();
+        if(stored.empty())
+            return;
+
+
+
+        MPS(filled, stored, dest, count, path);
+
+        //filled.pop_back();
+        path.pop_back();
+
 
 }
+*/
 
 
+//static map<string, vector<string>>adj_int;
 
+/*
+bool BFS(string src, string dest, int v,
+         string pred[], string dist[])
+{
+    // a queue to maintain queue of vertices whose
+    // adjacency list is to be scanned as per normal
+    // DFS algorithm
+    list<string> queue;
 
+    // boolean array visited[] which stores the
+    // information whether ith vertex is reached
+    // at least once in the Breadth first search
+    bool visited[v];
 
+    // initially all vertices are unvisited
+    // so v[i] for all i is false
+    // and as no path is yet constructed
+    // dist[i] for all i set to infinity
+    for (int i = 0; i < v; i++) {
+        visited[i] = false;
+        dist[i] = INT_MAX;
+        pred[i] = -1;
+    }
+
+    // now source is first to be visited and
+    // distance from source to itself should be 0
+    visited[src] = true;
+    dist[src] = 0;
+    queue.push_back(src);
+
+    // standard BFS algorithm
+    while (!queue.empty()) {
+        int u = queue.front();
+        queue.pop_front();
+        for (int i = 0; i < adj_int[u].size(); i++) {
+            if (visited[adj_int[u][i]] == false) {
+                visited[adj_int[u][i]] = true;
+                dist[adj_int[u][i]] = dist[u] + 1;
+                pred[adj_int[u][i]] = u;
+                queue.push_back(adj_int[u][i]);
+
+                // We stop BFS when we find
+                // destination.
+                if (adj_int[u][i] == dest)
+                    return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+// utility function to print the shortest distance
+// between source vertex and destination vertex
+void SD(vector<int> adj_int[], int s,
+                           int dest, int v)
+{
+    // predecessor[i] array stores predecessor of
+    // i and distance array stores distance of i
+    // from s
+    int pred[v], dist[v];
+
+    if (MFS(adj_int, s, dest, v, pred, dist) == false) {
+        cout << "Given source and destination"
+             << " are not connected";
+        return;
+    }
+
+    // vector path stores the shortest path
+    vector<int> path;
+    int crawl = dest;
+    path.push_back(crawl);
+    while (pred[crawl] != -1) {
+        path.push_back(pred[crawl]);
+        crawl = pred[crawl];
+    }
+
+    // distance from source is in distance array
+    cout << "Shortest path length is : "
+         << dist[dest];
+
+    // printing path from source to destination
+    cout << "\nPath is::\n";
+    for (int i = path.size() - 1; i >= 0; i--)
+        cout << path[i] << " ";
+}
+*/
 
 
 // make a disposition based on input
@@ -212,9 +490,6 @@ while (!ss.eof()) {
 
     }
 
-
-
-
     if(wordlist.at(0) == "0"){
         DFS(wordlist.at(1));
 
@@ -222,18 +497,8 @@ while (!ss.eof()) {
     }
 
     else if(wordlist.at(0) == "1"){
-        MPSS(wordlist.at(1),wordlist.at(2));
-        /*
-        if(!(min_tmp==10000000)) {
-            cout << min_tmp << endl;
-        }
-         */
-        if(!min_path.empty()){
-            for(auto x: min_path){
-                cout<<x<<" ";
-            }
-            cout<<endl;
-        }
+        MPSS(encode[wordlist.at(1)],encode[wordlist.at(2)]);
+
 
     }
 
@@ -250,6 +515,7 @@ while (!ss.eof()) {
 
 int main() {
     A_M();
+    AMP();
     std::string exit = "go";
     //vector<vector<int>> map;
     while(exit != "exit") {
@@ -257,10 +523,6 @@ int main() {
         menu();
         std::string u_input;
         getline(std::cin,u_input);
-
-
-
-
         exit = decision(u_input);//decide on output checks if it should exit
 
     }
