@@ -12,7 +12,25 @@
 #include <map>
 #include <bits/stdc++.h>
 using namespace std;
+/*
+ * tried to make dictionary to change string to int didn't work
+template<class T>
+class Dictionary{
+    public:
+    Dictionary(){
+    }
+    explicit Dictionary(T data1, T data2){
+        key = new map<data1,data2>;
+        key[data1]=data2;
+        value[data2]=data1;
+    }
 
+    private:
+    static map<T, T>key;
+    static map<T,T>value;
+
+}
+*/
 void menu(){
     std::cout.width(20);
     std::cout<<"MENU"<<std::endl<<std::endl<<"Depth-First Search (0), Minimum Path Search (1) "<<std::endl;
@@ -25,9 +43,9 @@ void DF(list<string> filled, stack<string> stored);
 
 bool check(list<string> foolist, const string& foovar);
 
-void MPSS(int source, int destination);
-void MPSS(const string& input, const string& string2);
-
+//void MPSS(int source, int destination);
+//void MPSS(const string& input, const string& string2);
+void MPSS(string input, string string2);
 void MPS(list<string> list1, queue<string> stack1, string basicString,int count,vector<string> path = {});
 
 static map<int, vector<int>>adj_int;
@@ -107,8 +125,8 @@ void AMP(){
     add_edge(encode["H"],encode["I"]);
     add_edge(encode["I"],encode["F"]);
 }
-
-
+/*
+// example code to test what I wrote
 bool MFS(int src, int dest, int v,
          int pred[], int dist[])
 {
@@ -194,8 +212,41 @@ void SD(int s,
     for (int i = path.size() - 1; i >= 0; i--)
         cout << decode[path[i]] << " ";
 }
+*/
+void short_self(string start, string end, map<string,string>dict_store,queue<string>QUEUE,list<string> filled={}){
+    string current = QUEUE.front();
+    QUEUE.pop();
+    filled.push_back(current);
+    vector<string>tmp = adjacency_list[current];
+    for(const auto& k: tmp){
+        if(!check(filled,k)){
+            QUEUE.push(k);
+            dict_store[k]=current;
+        }
+      if(k == end){
+          string backtrack= end;
+          stack<string> min_path;
+          min_path.push(end);
+          while(backtrack!=start){
+              backtrack = dict_store[backtrack];
+              min_path.push(backtrack);
+          }
+          while(!min_path.empty()){
+              cout<<min_path.top()<<" ";
+              min_path.pop();
+          }
+          cout<<endl;
 
-
+          return;
+      }
+    }
+    if(!QUEUE.empty()){
+        short_self(start,end,dict_store,QUEUE,filled);
+    }
+    else{
+        cout<<"No Path"<<endl;
+    }
+}
 
 
 
@@ -287,20 +338,18 @@ bool check(list<string> foolist, const string& foovar) {
 
 }
 
-void MPSS(const string& input,const string& go){
-    list<string> used;
-    queue<string> tmp_queue;
-    used.push_back(input);
-    tmp_queue.push(input);
-    int count=0;
-    vector<string> path = {};
-//    MPS(used,tmp_queue,go,count,path);
-}
 
 
 
-void MPSS(int source, int destination){
-    SD(source, destination, 9);
+void MPSS(string source, string destination){
+    //SD(source, destination, 9);
+    //cout<<endl;
+    map<string,string> dict_store;
+    queue<string> QUEUE, ORIG;
+    QUEUE.push(source);
+    //ORIG.push(-1);
+    dict_store[source]="null";
+    short_self(source,destination,dict_store,QUEUE);
 
 }
 //int min = 100000000;
@@ -439,7 +488,7 @@ void SD(vector<int> adj_int[], int s,
 
 
 // make a disposition based on input
-std::string decision(const std::string& user_input){
+ std::string decision(const std::string& user_input){
     std::string key = "null";
 
     std::string del = " ";//parameter to use
@@ -478,8 +527,9 @@ while (!ss.eof()) {
     }
 
     //check valid input or if the input value is 0
-    if(wordlist.at(1).size() > 1){
-        for(int k = 1; k<wordlist.size();k++) {
+    if(wordlist.size()>1){
+    if(wordlist.at(1).size() > 1) {
+        for (int k = 1; k < wordlist.size(); k++) {
             for (char i: wordlist.at(k)) {
                 if (!std::isalpha(i)) {
                     std::cout << "input is not a char" << std::endl;
@@ -487,7 +537,7 @@ while (!ss.eof()) {
                 }
             }
         }
-
+    }
     }
 
     if(wordlist.at(0) == "0"){
@@ -497,7 +547,7 @@ while (!ss.eof()) {
     }
 
     else if(wordlist.at(0) == "1"){
-        MPSS(encode[wordlist.at(1)],encode[wordlist.at(2)]);
+        MPSS(wordlist.at(1),wordlist.at(2));
 
 
     }
