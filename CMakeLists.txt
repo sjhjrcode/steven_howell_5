@@ -3,4 +3,4 @@ project(steven_howell_5)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(steven_howell_5 main.cpp)
+add_executable(steven_howell_5 steven_howell_5.cpp)
